@@ -1,0 +1,144 @@
+#FLOYD REVERSE LOOP
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+class LinkedList:
+    def __init__(self):
+        self.head = None
+
+    def detectAndRemoveLoop(self):
+        if self.head is None:
+            return
+        if self.head.next is None:
+            return
+
+        slow_p = self.head
+        fast_p = self.head
+
+        while slow_p and fast_p and fast_p.next:
+            slow_p = slow_p.next
+            fast_p = fast_p.next.next
+
+            if slow_p == fast_p:
+                print("Meeting point:", slow_p.data)
+                slow_p = self.head
+
+                while slow_p.next != fast_p.next:
+                    slow_p = slow_p.next
+                    fast_p = fast_p.next
+
+                print("Start of the loop:", fast_p.next.data)
+                fast_p.next = None
+
+    def printList(self):
+        temp = self.head
+        while temp:
+            print(temp.data, end=' ')
+            temp = temp.next
+
+llist = LinkedList()
+llist.head = Node(60)
+llist.head.next = Node(2)
+llist.head.next.next = Node(1)
+llist.head.next.next.next = Node(45)
+llist.head.next.next.next.next = Node(92)
+extra = Node(53)
+llist.head.next.next.next.next.next = extra
+extra.next = llist.head.next
+llist.detectAndRemoveLoop()
+print("\nLinked List after removing loop:")
+llist.printList()
+
+
+#KRUSKALS ALGO
+class Graph:
+    def __init__(self, vertices):
+        self.V = vertices
+        self.graph = []
+
+    def add_edge(self, u, v, w):
+        self.graph.append([u, v, w])
+
+    def find(self, parent, i):
+        if parent[i] == i:
+            return i
+        return self.find(parent, parent[i])
+
+    def apply_union(self, parent, rank, x, y):
+        xroot = self.find(parent, x)
+        yroot = self.find(parent, y)
+        if rank[xroot] < rank[yroot]:
+            parent[xroot] = yroot
+        elif rank[xroot] > rank[yroot]:
+            parent[yroot] = xroot
+        else:
+            parent[yroot] = xroot
+            rank[xroot] += 1
+
+    def kruskal_algo(self):
+        self.graph = sorted(self.graph, key=lambda item: item[2])
+        parent = []
+        rank = []
+        for node in range(self.V):
+            parent.append(node)
+            rank.append(0)
+
+        e = 0  # Number of edges in the minimum spanning tree
+        result = []  # Edges of the minimum spanning tree
+        i = 0  # Index of the current edge
+
+        while e < self.V - 1 and i < len(self.graph):
+            u, v, w = self.graph[i]
+            i = i + 1
+            x = self.find(parent, u)
+            y = self.find(parent, v)
+            if x != y:
+                e = e + 1
+                result.append([u, v, w])
+                self.apply_union(parent, rank, x, y)
+
+        for u, v, weight in result:
+            print("%d - %d: %d" % (u, v, weight))
+
+
+g = Graph(6)
+g.add_edge(0, 1, 4)
+g.add_edge(0, 2, 4)
+g.add_edge(1, 2, 2)
+g.add_edge(1, 0, 4)
+g.add_edge(2, 0, 4)
+g.add_edge(2, 1, 2)
+g.add_edge(3, 2, 2)
+g.add_edge(3, 4, 3)
+g.add_edge(4, 2, 4)
+g.add_edge(4, 3, 3)
+g.add_edge(5, 2, 2)
+g.add_edge(5, 4, 3)
+g.kruskal_algo()
+
+
+#PRIMS ALGO
+INF = 9999999
+N = 5
+G = [[0, 19, 5, 0, 0], [19, 0, 5, 9, 2], [5, 5, 0, 1, 6], [0, 9, 1, 0, 1], [0, 2, 6, 1, 0]]
+selected_node = [0, 0, 0, 0, 0]
+no_edge = 0
+selected_node[0] = True
+print("edge: weight\n")
+while no_edge < N - 1:
+    minimum = INF
+    a = 0
+    b = 0
+    for m in range(N):
+        if selected_node[m]:
+            for n in range(N):
+                if (not selected_node[n]) and G[m][n]:
+                    if G[m][n] < minimum:
+                        minimum = G[m][n]
+                        a = m
+                        b = n
+    print(str(a) + "-" + str(b) + ":" + str(G[a][b]))
+    selected_node[b] = True
+    no_edge += 1
